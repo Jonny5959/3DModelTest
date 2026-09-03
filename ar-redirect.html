@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Opening AR…</title>
+<style>
+  body { font-family: -apple-system, sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; background:#111; color:#fff; text-align:center; padding:20px; box-sizing:border-box; }
+  p { max-width: 320px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<p id="msg">Opening AR…</p>
+<script>
+  // Reads ?glb=...&usdz=... from the URL and redirects to the correct AR
+  // experience for whichever device opened this link — this page only
+  // needs to be reachable itself, not the main viewer, so it works as a
+  // single QR target regardless of whether that page is live yet.
+  var params = new URLSearchParams(window.location.search);
+  var glbUrl = params.get("glb");
+  var usdzUrl = params.get("usdz");
+  var ua = navigator.userAgent || "";
+  var isAndroid = /android/i.test(ua);
+  var isIOS = /iphone|ipad|ipod/i.test(ua);
+
+  if (isAndroid && glbUrl) {
+    var fallback = encodeURIComponent(window.location.href);
+    window.location.href = "intent://arvr.google.com/scene-viewer/1.0?file=" + encodeURIComponent(glbUrl) +
+      "&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=" + fallback + ";end;";
+  } else if (isIOS && usdzUrl) {
+    window.location.href = usdzUrl;
+  } else if (!isAndroid && !isIOS) {
+    document.getElementById("msg").textContent = "Open this link on an Android or iPhone/iPad to view in AR.";
+  } else {
+    document.getElementById("msg").textContent = "AR isn't set up for this device yet.";
+  }
+</script>
+</body>
+</html>
